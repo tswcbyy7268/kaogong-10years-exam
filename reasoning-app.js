@@ -9,7 +9,8 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const catMap = Object.fromEntries(bank.categories.map(c => [c.id, c]));
   const all = [...bank.questions].sort((a,b) => b.year-a.year || a.variant.localeCompare(b.variant,'zh') || a.number-b.number);
-  const answers = new Map();
+  const progress = window.PracticeProgress.attach('reasoning', bank, () => { state.reveal=false; renderAll(); });
+  const answers = progress.answers;
   const state = { group:'图形推理', category:'', year:'', variant:'', search:'', selected:all.find(q => q.year===2026 && q.variant==='副省级' && q.number===81)?.id || all[0]?.id, listPage:0, materialPage:0, reveal:false };
   const pageSize=8;
   let filtered=[];
@@ -88,7 +89,7 @@
     switch(b.id){
       case 'focus-question': state.materialPage=Math.max(0,q.pages.findIndex(p=>p.page===q.focusPage));renderDetail();break;
       case 'enlarge-page': showImage(q.pages[state.materialPage].image,`${q.year}年${q.variant} · 原卷第${q.pages[state.materialPage].page}页`);break;
-      case 'submit-answer': {const a=answerState(q);if(a.choice){a.submitted=true;renderList();renderDetail();}break;}
+      case 'submit-answer': {const a=answerState(q);if(a.choice){a.submitted=true;progress.submit(q.id,a.choice);renderList();renderDetail();}break;}
       case 'toggle-analysis': state.reveal=!state.reveal;renderDetail();if(state.reveal)$('#analysis').scrollIntoView({behavior:'smooth',block:'start'});break;
       case 'retry': answers.set(q.id,{choice:null,submitted:false});state.reveal=false;renderList();renderDetail();break;
       case 'previous-question': {const i=filtered.findIndex(x=>x.id===q.id);if(i>0)selectQuestion(filtered[i-1].id);break;}
