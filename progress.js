@@ -79,6 +79,11 @@
       render();
       return {
         answers,
+        summary({ category = '', group = '' } = {}) {
+          const questions = bank.questions.filter(q => (!category || q.category === category) && (!group || q.group === group));
+          const done = questions.filter(q => value.answers[module][q.id]).length;
+          return { total: questions.length, done, remaining: questions.length - done };
+        },
         submit(id, choice) {
           if (!validIds.has(id) || !['A', 'B', 'C', 'D'].includes(choice)) return;
           // Merge the latest stored answers so other open tabs keep their progress.

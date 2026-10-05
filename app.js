@@ -22,7 +22,7 @@
     const max=Math.max(0,Math.ceil(filtered.length/pageSize)-1); state.listPage=Math.min(max,state.listPage);
   }
   function renderCategories() {
-    $('#categories').innerHTML=[{id:'',name:'全部考点',count:bank.questions.length},...bank.categories].map(c=>`<button type="button" class="category-button ${c.id===state.category?'active':''}" data-category="${c.id}" aria-pressed="${c.id===state.category}"><span class="category-code">${c.id||'全'}</span><span class="category-label">${esc(c.name)}</span><span class="category-count">${c.count}</span></button>`).join('');
+    $('#categories').innerHTML=[{id:'',name:'全部考点',count:bank.questions.length},...bank.categories].map(c=>{ const stats=progress.summary({category:c.id}); return `<button type="button" class="category-button ${c.id===state.category?'active':''}" data-category="${c.id}" aria-pressed="${c.id===state.category}"><span class="category-code">${c.id||'全'}</span><span class="category-label"><span class="category-name">${esc(c.name)}</span><span class="category-progress">已做 ${stats.done} 道 · 剩余 ${stats.remaining} 道</span></span><span class="category-count" title="总题数">${stats.total}</span></button>`; }).join('');
     $('#total-count').textContent=bank.questions.length;
   }
   function renderList() {
@@ -30,6 +30,8 @@
     $('#category-title').textContent=category?.name || '全部考点';
     $('#category-description').textContent=category?.description || '按考点挑选原题，先作答，再核对解析。';
     $('#filtered-count').textContent=filtered.length;
+    const knowledgeStats=progress.summary({category:state.category});
+    $('#knowledge-progress').textContent=`本轮${state.category?'知识点':'全部考点'}进度：已做 ${knowledgeStats.done} 道，剩余 ${knowledgeStats.remaining} 道，共 ${knowledgeStats.total} 道`;
     const items=filtered.slice(state.listPage*pageSize,(state.listPage+1)*pageSize);
     $('#question-list').innerHTML=items.length?items.map(q=>{
       const a=answerState(q);
@@ -80,7 +82,7 @@
     switch(b.id){
       case 'focus-question': state.materialPage=Math.max(0,q.pages.findIndex(p=>p.page===q.focusPage));renderDetail();break;
       case 'enlarge-page': showImage(q.pages[state.materialPage].image,`${q.year}年${q.variant} · 原卷第${q.pages[state.materialPage].page}页`);break;
-      case 'submit-answer': {const a=answerState(q);if(a.choice){a.submitted=true;progress.submit(q.id,a.choice);renderList();renderDetail();}break;}
+      case 'submit-answer': {const a=answerState(q);if(a.choice){a.submitted=true;progress.submit(q.id,a.choice);renderCategories();renderList();renderDetail();}break;}
       case 'toggle-analysis': state.reveal=!state.reveal;renderDetail();if(state.reveal)$('#analysis').scrollIntoView({behavior:'smooth',block:'start'});break;
       case 'retry': answers.set(q.id,{choice:null,submitted:false});state.reveal=false;renderList();renderDetail();break;
       case 'previous-question': {const i=filtered.findIndex(x=>x.id===q.id);if(i>0)selectQuestion(filtered[i-1].id);break;}
