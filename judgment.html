@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>判断推理练习室 · 2016—2026国考真题</title>
+  <meta name="description" content="2016—2026年国考判断推理分类训练：图推15类、定义判断6类、类比推理13类、逻辑判断9类，附题型总结、原题与参考解析。">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='10' fill='%2323453c'/%3E%3Cpath d='M10 28V20h4v8m4 0V12h4v16m4 0V16h4v12' stroke='%23fff' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="reasoning-bank">
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="判断推理练习室首页"><span class="brand-mark"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M6 21V14h4v7m4 0V7h4v14m4 0V11h2v10"/></svg></span><span><strong>判断推理练习室</strong><small>2016—2026 · 国考真题</small></span></a>
+<nav class="module-nav" aria-label="训练模块"><a href="index.html">资料分析</a><a href="judgment.html" aria-current="page">判断推理</a></nav>
+    <div class="topnote"><span class="edition">分类训练</span><span>原题图表 · 参考解析</span></div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="考点分类">
+      <div class="side-title">专项题库 <span id="total-count">1050</span></div>
+      <nav id="categories"></nav>
+      <div class="sidebar-footer"><strong>按题型练，再核对依据</strong><p>先独立作答，再看解析。<br>各专项均附识别线索与方法。</p><div class="inventory"><span><b>11</b>年真题</span><span><b>27</b>套试卷</span></div></div>
+    </aside>
+    <main>
+      <div class="workspace-heading"><div><div class="eyebrow">QUESTION BANK</div><h1 id="category-title">图形推理</h1><p id="category-description">选一道题，开始今天的练习。</p></div><div class="count-pill"><strong id="filtered-count">270</strong><span>道可练</span></div></div>
+      <div id="groups" class="group-tabs" role="group" aria-label="判断推理题型"></div>
+      <details class="type-guide" id="type-guide"><summary>题型总结与方法 <span id="guide-count"></span></summary><div id="type-guide-content"></div></details>
+      <form class="filters" id="filters" autocomplete="off">
+        <label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><input id="search" type="search" placeholder="搜索题干、年份或题号" aria-label="搜索题目"></label>
+        <label class="select-wrap"><span>年份</span><select id="year" aria-label="按年份筛选"><option value="">全部年份</option></select></label>
+        <label class="select-wrap"><span>试卷出处</span><select id="variant" aria-label="按试卷出处筛选"><option value="">全部试卷</option><option>副省级</option><option>地市级</option><option>行政执法</option></select></label>
+        <button type="button" class="text-button" id="reset">重置筛选</button>
+      </form>
+      <div class="practice-grid">
+        <section class="catalog" aria-label="题目列表"><div class="catalog-heading"><strong>题目</strong><span id="result-info">按年份由近到远</span></div><div id="question-list"></div><div class="list-pager"><button id="list-prev" class="quiet-button" type="button">上一页</button><span id="list-page"></span><button id="list-next" class="quiet-button" type="button">下一页</button></div></section>
+        <article class="detail" id="detail" aria-label="题目与解析">
+          <div class="empty"><h2>题库正在加载</h2><p>请选择左侧考点。</p></div>
+        </article>
+      </div>
+      <p class="bottom-note">2016—2026年27套试卷，共1050道判断推理题次，其中图推270道。按原卷编号分别收录，不同试卷可能含同题。原题和参考解析来自所提供文件，部分卷为回忆版；参考答案不等于官方答案。</p>
+    </main>
+  </div>
+  <dialog id="image-dialog"><div class="dialog-toolbar"><strong id="image-caption">原卷页面</strong><div class="zoom-controls"><button id="zoom-out" class="quiet-button" type="button">缩小</button><button id="zoom-in" class="quiet-button" type="button">放大</button><button id="close-image" class="quiet-button" type="button">关闭</button></div></div><div class="zoom-viewport"><img id="zoom-image" alt="放大的原卷内容"></div></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="reasoning-data.js"></script><script src="reasoning-app.js"></script>
+</body>
+</html>
