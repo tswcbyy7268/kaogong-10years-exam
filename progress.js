@@ -79,8 +79,8 @@
       render();
       return {
         answers,
-        summary({ category = '', group = '' } = {}) {
-          const questions = bank.questions.filter(q => (!category || (q.categoryIds || [q.category]).includes(category)) && (!group || (q.groupIds || [q.group]).includes(group)));
+        summary({ category = '', group = '', matches = null } = {}) {
+          const questions = bank.questions.filter(q => (!matches || matches(q)) && (!category || (q.categoryIds || [q.category]).includes(category)) && (!group || (q.groupIds || [q.group]).includes(group)));
           const done = questions.filter(q => value.answers[module][q.id]).length;
           return { total: questions.length, done, remaining: questions.length - done };
         },

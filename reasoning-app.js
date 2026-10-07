@@ -15,23 +15,27 @@
   const pageSize=8;
   let filtered=[];
   function answerState(q) { if (!answers.has(q.id)) answers.set(q.id,{choice:null,submitted:false}); return answers.get(q.id); }
-  function filterQuestions() {
+  function matchesScope(q) {
     const needle=state.search.trim().toLowerCase();
-    filtered=all.filter(q => (!state.group || q.group===state.group) && (!state.category || q.category===state.category) && (!state.year || q.year===Number(state.year)) && (!state.variant || q.variant===state.variant || q.aliases.some(a=>a.variant===state.variant)) && (!needle || `${q.year} ${q.variant} ${q.number} ${q.stem} ${catMap[q.category].name} ${(q.tags||[]).join(' ')} ${q.aliases.map(a=>`${a.year} ${a.variant} ${a.number}`).join(' ')}`.toLowerCase().includes(needle)));
+    return (!state.year || q.year===Number(state.year)) && (!state.variant || q.variant===state.variant || q.aliases.some(a=>a.variant===state.variant)) && (!needle || `${q.year} ${q.variant} ${q.number} ${q.stem} ${catMap[q.category].name} ${(q.tags||[]).join(' ')} ${q.aliases.map(a=>`${a.year} ${a.variant} ${a.number}`).join(' ')}`.toLowerCase().includes(needle));
+  }
+  function scopedSummary(options={}) { return progress.summary({...options,matches:matchesScope}); }
+  function filterQuestions() {
+    filtered=all.filter(q => (!state.group || q.group===state.group) && (!state.category || q.category===state.category) && matchesScope(q));
     if (!filtered.some(q=>q.id===state.selected)) { state.selected=filtered[0]?.id || null; state.materialPage=0; state.reveal=false; }
     const max=Math.max(0,Math.ceil(filtered.length/pageSize)-1); state.listPage=Math.min(max,state.listPage);
   }
   function renderCategories() {
-    $('#categories').innerHTML=[{id:'',name:state.group?'本类型全部':'全部考点',count:all.filter(q=>!state.group||q.group===state.group).length},...bank.categories.filter(c=>!state.group||c.group===state.group)].map(c=>{ const stats=progress.summary({category:c.id, group: state.group}); return `<button type="button" class="category-button ${c.id===state.category?'active':''}" data-category="${c.id}" aria-pressed="${c.id===state.category}"><span class="category-code">${c.id.replace(/^G/,'')||'全'}</span><span class="category-label"><span class="category-name">${esc(c.name)}</span><span class="category-progress">已做 ${stats.done} 道 · 剩余 ${stats.remaining} 道</span></span><span class="category-count" title="总题数">${stats.total}</span></button>`; }).join('');
-    $('#total-count').textContent=bank.questions.length;
+    $('#categories').innerHTML=[{id:'',name:state.group?'本类型全部':'全部考点',count:all.filter(q=>!state.group||q.group===state.group).length},...bank.categories.filter(c=>!state.group||c.group===state.group)].map(c=>{ const stats=scopedSummary({category:c.id, group: state.group}); return `<button type="button" class="category-button ${c.id===state.category?'active':''}" data-category="${c.id}" aria-pressed="${c.id===state.category}"><span class="category-code">${c.id.replace(/^G/,'')||'全'}</span><span class="category-label"><span class="category-name">${esc(c.name)}</span><span class="category-progress">已做 ${stats.done} 道 · 剩余 ${stats.remaining} 道</span></span><span class="category-count" title="总题数">${stats.total}</span></button>`; }).join('');
+    $('#total-count').textContent=scopedSummary().total;
   }
   function renderList() {
     const category=catMap[state.category];
     $('#category-title').textContent=category?.name || state.group || '全部判断推理';
     $('#category-description').textContent=category?.description || (state.group==='图形推理'?'选一个规律专项，先观察原图，再核对参考解析。':'按年份与试卷挑选原题，先作答，再核对参考解析。');
     $('#filtered-count').textContent=filtered.length;
-    const knowledgeStats=progress.summary({category:state.category, group: state.group});
-    $('#knowledge-progress').textContent=`本轮${state.category?'知识点':state.group?'题型':'全部考点'}进度：已做 ${knowledgeStats.done} 道，剩余 ${knowledgeStats.remaining} 道，共 ${knowledgeStats.total} 道`;
+    const knowledgeStats=scopedSummary({category:state.category, group: state.group});
+    $('#knowledge-progress').textContent=`本轮${state.year||state.variant||state.search.trim()?'当前筛选 · ':''}${state.category?'知识点':state.group?'题型':'全部考点'}进度：已做 ${knowledgeStats.done} 道，剩余 ${knowledgeStats.remaining} 道，共 ${knowledgeStats.total} 道`;
     const items=filtered.slice(state.listPage*pageSize,(state.listPage+1)*pageSize);
     $('#question-list').innerHTML=items.length?items.map(q=>{
       const a=answerState(q);
@@ -47,7 +51,7 @@
   function renderGuide() {
     const categories=bank.categories.filter(c=>(!state.group||c.group===state.group)&&(!state.category||c.id===state.category));
     $('#guide-count').textContent=`${categories.length}类`;
-    $('#type-guide-content').innerHTML='<p class="guide-note">按主要解题任务或关系归类，同题可涉及多个考点；这是训练分类，参考解析以原文件为准。</p>'+categories.map(c=>`<section class="guide-item"><button type="button" class="guide-category" data-guide-category="${c.id}">${esc(c.name)}<span>${c.count}题次</span></button><dl><dt>识别线索</dt><dd>${esc(c.description)}</dd>${c.ability?`<dt>训练能力</dt><dd>${esc(c.ability)}</dd>`:''}<dt>解题方法</dt><dd>${esc(c.hint)}</dd>${c.pitfall?`<dt>常见误区</dt><dd>${esc(c.pitfall)}</dd>`:''}</dl></section>`).join('');
+    $('#type-guide-content').innerHTML='<p class="guide-note">按主要解题任务或关系归类，同题可涉及多个考点；这是训练分类，参考解析以原文件为准。</p>'+categories.map(c=>`<section class="guide-item"><button type="button" class="guide-category" data-guide-category="${c.id}">${esc(c.name)}<span>${scopedSummary({category:c.id}).total}题次</span></button><dl><dt>识别线索</dt><dd>${esc(c.description)}</dd>${c.ability?`<dt>训练能力</dt><dd>${esc(c.ability)}</dd>`:''}<dt>解题方法</dt><dd>${esc(c.hint)}</dd>${c.pitfall?`<dt>常见误区</dt><dd>${esc(c.pitfall)}</dd>`:''}</dl></section>`).join('');
   }
   function getCurrent(){ return filtered.find(q=>q.id===state.selected); }
   function analysisHtml(q) {
@@ -66,7 +70,7 @@
     $('#detail').innerHTML=`<div class="detail-kicker"><span class="type-label">${esc(cat.name)}</span><span>${q.year}年国考 · ${esc(q.variant)}</span><span>第${q.number}题</span></div><h2>${esc(q.stem || `请阅读原卷第${q.number}题`)}</h2><div class="source-line">收录方式${q.aliases.length?`：${q.aliases.map(x=>`<span class="alias-chip">${x.year}${esc(x.variant)} · 第${x.number}题</span>`).join('')}`:'：按原卷编号分别收录'}</div><section aria-label="完整材料与原题"><div class="material-heading"><strong>材料与原题</strong><button type="button" class="quiet-button" id="focus-question">定位第${q.number}题</button></div><div class="page-tabs"><span class="page-label">原卷页码</span>${q.pages.map((p,i)=>`<button type="button" class="page-tab ${i===state.materialPage?'active':''}" data-material-page="${i}" aria-pressed="${i===state.materialPage}">${p.page}</button>`).join('')}<button type="button" class="text-button" id="enlarge-page">放大阅读</button></div><div class="page-frame"><img class="source-image" src="${page.image}" alt="${q.year}年${esc(q.variant)}判断推理原卷第${page.page}页，包含本题材料或原题" data-zoom="${page.image}" data-caption="${q.year}年${esc(q.variant)} · 原卷第${page.page}页"></div><p class="page-help">请作答第${q.number}题。切换页码阅读材料与选项；点击图片可放大。</p></section><section class="answer-area" aria-label="选择答案"><div class="answer-label"><strong>选择你的答案</strong><span>答案默认收起</span></div><div class="answer-buttons">${['A','B','C','D'].map(letter=>`<button type="button" class="answer-choice ${a.choice===letter?'selected':''} ${a.submitted&&letter===q.answer?'correct':''} ${a.submitted&&letter===a.choice&&a.choice!==q.answer?'incorrect':''}" data-choice="${letter}" aria-pressed="${a.choice===letter}" ${a.submitted?'disabled':''}>${letter}</button>`).join('')}</div><div class="action-row"><button type="button" class="primary-button" id="submit-answer" ${(!a.choice || a.submitted)?'disabled':''}>${a.submitted?'已提交':'提交答案'}</button><button type="button" class="analysis-toggle" id="toggle-analysis" aria-expanded="${state.reveal}">${state.reveal?'收起解析':a.submitted?'查看解析':'直接查看解析'}</button>${a.submitted?'<button type="button" class="text-button" id="retry">重新作答</button>':''}</div>${feedback}</section>${state.reveal?analysisHtml(q):''}<div class="question-nav"><button type="button" class="quiet-button" id="previous-question" ${index<=0?'disabled':''}>上一题</button><span class="footer-status">${index+1} / ${filtered.length}</span><button type="button" class="quiet-button" id="next-question" ${index>=filtered.length-1?'disabled':''}>下一题</button></div><p class="reference-name">原题来源：${esc(q.sourceName)}</p>`;
     $('#detail').querySelectorAll('img').forEach(img=>img.addEventListener('error',()=>{img.replaceWith(Object.assign(document.createElement('p'),{className:'image-error',textContent:'图片未能加载，请刷新页面或检查 assets 文件夹是否完整。'}));},{once:true}));
   }
-  function renderGroups(){ $('#groups').innerHTML=[{name:'',count:all.length},...bank.groups].map(g=>`<button type="button" class="group-tab ${state.group===g.name?'active':''}" data-group="${g.name}" aria-pressed="${state.group===g.name}">${g.name||'全部判断'}<span>${g.count}</span></button>`).join(''); }
+  function renderGroups(){ $('#groups').innerHTML=[{name:'',count:all.length},...bank.groups].map(g=>`<button type="button" class="group-tab ${state.group===g.name?'active':''}" data-group="${g.name}" aria-pressed="${state.group===g.name}">${g.name||'全部判断'}<span>${scopedSummary({group:g.name}).total}</span></button>`).join(''); }
   function renderAll(){ renderGroups(); filterQuestions();const index=filtered.findIndex(q=>q.id===state.selected);if(index>=0)state.listPage=Math.floor(index/pageSize);renderCategories();renderGuide();renderList();renderDetail(); }
   function selectQuestion(id){ state.selected=id;state.pageQuestion=null;state.reveal=false; const index=filtered.findIndex(q=>q.id===id);if(index>=0)state.listPage=Math.floor(index/pageSize);renderList();renderDetail(); }
   function showImage(src,caption){ $('#zoom-image').src=src;$('#zoom-image').alt=caption;$('#image-caption').textContent=caption;state.zoomWidth=innerWidth<600?900:Math.min(1200,innerWidth*.86);$('#zoom-image').style.width=state.zoomWidth+'px';$('#image-dialog').showModal();$('.zoom-viewport').scrollTo(0,0); }
