@@ -31,7 +31,7 @@
         <button type="button" class="text-button" id="reset">重置筛选</button>
       </form>
       <div class="practice-grid">
-        <section class="catalog" aria-label="题目列表"><div class="catalog-heading"><strong>题目</strong><span id="result-info">按年份由近到远</span></div><div id="question-list"></div><div class="list-pager"><button id="list-prev" class="quiet-button" type="button">上一页</button><span id="list-page"></span><button id="list-next" class="quiet-button" type="button">下一页</button></div></section>
+        <details class="catalog" id="question-catalog" open><summary class="catalog-heading"><strong>题目列表</strong><span id="result-info">按年份由近到远</span><span class="catalog-toggle" aria-hidden="true"></span></summary><div class="catalog-body"><div id="question-list"></div><div class="list-pager"><button id="list-prev" class="quiet-button" type="button">上一页</button><span id="list-page"></span><button id="list-next" class="quiet-button" type="button">下一页</button></div></div></details>
         <article class="detail" id="detail" aria-label="题目与解析">
           <div class="empty"><h2>题库正在加载</h2><p>请选择左侧考点。</p></div>
         </article>

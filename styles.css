@@ -22,3 +22,27 @@
 .with-option-text .answer-choice{height:auto;min-height:48px;display:flex;align-items:flex-start;gap:12px;padding:12px 14px;text-align:left;white-space:normal;line-height:1.7}
 .with-option-text .choice-letter{flex:0 0 20px;font-weight:600}
 .with-option-text .choice-text{min-width:0;font-size:14px;font-weight:400;overflow-wrap:anywhere}
+
+/* Fold the catalog to keep room for the two reading panes. */
+.practice-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.catalog-heading{cursor:pointer;list-style:none;gap:12px;align-items:center}
+.catalog-heading::-webkit-details-marker{display:none}
+.catalog-heading #result-info{margin-left:auto}
+.catalog-toggle::after{content:"展开 ▾";white-space:nowrap;color:var(--green)}
+.catalog[open] .catalog-toggle::after{content:"收起 ▴"}
+.catalog:not([open]) .catalog-heading{border-bottom:0}
+.catalog #question-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));max-height:260px;overflow-y:auto}
+.catalog .question-item{min-width:0;border-right:1px solid var(--line);flex:none}
+.detail{padding:20px}
+.reading-columns{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:24px;align-items:start}
+.material-pane,.question-pane{min-width:0;max-height:calc(100vh - 64px);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:6px}
+.material-pane{position:sticky;top:20px}
+.question-pane{border-left:1px solid var(--line);padding-left:22px}
+.question-document{margin:18px 0}
+.question-page-frame{max-height:440px;overflow:auto;overscroll-behavior:contain}
+@media(max-width:1120px){.catalog #question-list{grid-template-columns:repeat(3,minmax(0,1fr))}.reading-columns{gap:16px;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}.question-pane{padding-left:14px}}
+@media(max-width:820px){.reading-columns{display:block}.material-pane,.question-pane{max-height:none;overflow:visible;padding-right:0;position:static}.question-pane{border-left:0;border-top:1px solid var(--line);padding:20px 0 0;margin-top:20px}.material-pane .page-frame{max-height:65vh;overflow:auto}.catalog #question-list{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog .question-preview{height:auto}.catalog .question-item{padding:12px}.detail{padding:16px}.catalog-heading{flex-wrap:wrap}}
+@media(max-width:480px){.catalog #question-list{grid-template-columns:minmax(0,1fr);max-height:260px}}
+
+.material-pane .page-frame{overflow:auto}
+.reading-scale{font-size:11px;color:var(--muted);min-width:32px;text-align:center}
